@@ -1,0 +1,71 @@
+---
+title: "ICE 3"
+#Name: Cleo You
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+school <-read_csv("ICE1_Data.csv")
+```
+
+```{r}
+school
+```
+
+```{r}
+graduationCollege <- school %>%
+  select('graduation 2010-11', 'college enroll 2010-11')
+
+plot(graduationCollege)
+```
+
+```{r}
+model <- lm('college enroll 2010-11' ~ 'graduation 2010-11', data = graduationCollege)
+summary(model)
+```
+
+```{r}
+plot(graduationCollege)
+abline(a=coef(model)[1], b=coef(model)[2], col="red") #declare the model first
+```
+
+```{r}
+videoData = read_csv("ICE3_data.csv")
+```
+
+```{r}
+videoData
+```
+
+```{r}
+summary(videoData)
+```
+
+```{r}
+videoDataRegression <- videoData %>% select(participation, watch.time, confusion.points, key.points)
+plot(videoDataRegression)
+```
+
+```{r}
+install.packages("psych")
+install.packages("pairs.panels")
+```
+
+```{r}
+library(psych)
+```
+```{r}
+pairs.panels(videoDataRegression, 
+             hist.col = "#6cace4",
+             ellipses = FALSE
+             )
+```
+
+```{r}
+videomodel <- lm(watch.time ~ participation + confusion.points + key.points, data = videoDataRegression)
+summary(videomodel)
+```
+

@@ -1,0 +1,82 @@
+---
+title: "ICE 6 "
+Name: Cleo You
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+set.seed(123)
+X<- rnorm(200, mean=1, sd=1.5)
+res<-rnorm(200, mean=0, sd=0.5) # A list of 200 residuals with sd of 0.5 
+y <- 1+2*X+res
+
+twoDData <-tibble(X=X, y=y)
+plot(twoDData)
+```
+
+```{r}
+pca <- prcomp(twoDData, scale.=TRUE)
+```
+
+```{r}
+summary(pca)
+```
+
+```{r}
+pca$rotation
+```
+PCA for Dimension Reducation
+```{r}
+pc1 <- pca$x[,1]
+rotation1 <-  pca$rotation[,1]
+
+```
+
+```{r}
+plot(scale(twoDData), col="blue")
+points(pc1 %*% t(rotation1), col="orange")
+```
+
+PCA Example in an Intelligent Tutoring System
+```{r}
+ICEdata <- read_csv("ICE6_Data.csv")
+```
+
+```{r}
+ICEdata
+```
+
+```{r}
+Icedata_noid <-ICEdata %>% select(-id)
+icepca <-prcomp(Icedata_noid, scale.=FALSE)
+summary(icepca)
+```
+
+```{r}
+icepca2c <-icepca$x[,1:2]
+plot(icepca2c)
+```
+
+```{r}
+cl <- kmeans(icepca2c, centers=3)
+plot(icepca2c, col=cl$cluster)
+```
+
+1. What could the two dimensions mean?
+
+2. How would you interpret the KMeans clustering?
+
+```{r}
+biplot(icepca, cex=.7)
+```
+```{r}
+biplot(icepca, cex=.9)
+```
+How should we explain the clusters?  In the case of ICE, does it posssible mean 3 different types of performance of students?  
+Very possible.  From the clustering result, it is basically based on dismention 1.  And dimension one is mostly about prior number of problem solved. If you have clustering results based on multiple dims like high dim 1 low dim 2; low dim 1 and high dim2.  The procedure is actually pretty much the same.  Use dims to explain the clustering and use eigenvalues to explain the dims. 
+
+
+

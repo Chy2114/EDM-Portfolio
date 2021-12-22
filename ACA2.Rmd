@@ -1,0 +1,169 @@
+---
+title: "Analysis Challenege Assignment 2"
+#Name: Cleo You
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+#Import the data
+training <- read.csv("aca2_dataset_training.csv")
+```
+
+```{r}
+#This is the data that we are going to train first. 
+training
+```
+```{r}
+#Checking out the summary of the data. 
+summary(training)
+```
+```{r}
+#To determine on or off task of students, I can clean the data with dropping off with some variables.
+#Before cleaning, pick and observe which variables that I am going to train.
+table(training$Activity)
+
+```
+```{r}
+table(training$ONTASK)
+#Counting Y or N in ONTASK category
+```
+
+```{r}
+table(training$Total.Time)
+```
+
+
+```{r}
+library(GGally)
+library(dplyr)
+```
+
+```{r}
+training %>% ggplot(aes(ONTASK,Total.Time)) +geom_point()
+# This graph shows us that from ONTASK, there are students last each activity with Total time. 
+```
+
+```{r}
+#Filtering students who are on task with have Total.time of working
+
+trainingA<-training %>% mutate(ONTASK_yes=as_factor(ONTASK)) %>%
+  select(ONTASK_yes, Total.Time,Obsv.act, Transitions.Durations)
+  filter(trainingA, ONTASK_yes == "Y" & Total.Time !=0)
+trainingA
+```
+
+```{r}
+logittask<-glm(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA, family="binomial")
+```
+
+```{r}
+summary(logittask)
+```
+
+
+
+```{r}
+pairs(trainingA)
+#Scatter plots with four variables(ONTASK, Total.Time, Obsv.act, Transitions.Durations)
+```
+
+Decision Tree to apply to on task or off task
+```{r}
+library(party)
+```
+```{r}
+TrainingTree <- ctree(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+```
+
+```{r}
+print(TrainingTree)
+```
+
+```{r}
+plot(TrainingTree)
+```
+Naive to apply to on task or off task
+
+```{r}
+library(e1071)
+```
+```{r}
+trainingB <- naiveBayes(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+```
+```{r}
+ONTASK_NB <- predict(trainingB, trainingA[,2:4])
+```
+```{r}
+training_performance=trainingA$ONTASK_yes==ONTASK_NB
+cat('The accuracy is', sum(training_performance)/length(training_performance)*100, '%')
+```
+```{r}
+#Step 1: Split data
+set.seed(12345)
+sampleA <- floor(0.8*nrow(trainingA))
+pickedA <-sample(seq_len(nrow(trainingA)),size=sampleA)
+trainingC <- trainingA[pickedA,]
+testingC <- trainingA[-pickedA,]
+```
+
+```{r}
+#Step 2: Re-train the model. 
+ACAlogit <- glm(ONTASK_yes ~ Total.Time+Obsv.act+Transitions.Durations, data=trainingC, family="binomial")
+```
+
+```{r}
+#Recall decision tree and naivebayes methods
+TrainingTree <- ctree(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+trainingB <- naiveBayes(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+
+```
+
+```{r}
+# Feed the variables in the testing dataset and obtain the predicted values.
+probabilities_A <- predict(ACAlogit, testingC[,2:4], type='response')
+pred_logit <- ifelse(probabilities_A > 0.5, "Yes", "No")
+pred_tree <- predict(TrainingTree, testingC[,2:4])
+pred_naive <-predict(trainingB, testingC[,2:4])
+```
+
+```{r}
+#logistic regression model confusion matrix
+logitTASK <-table(testingC$ONTASK_yes, pred_logit)
+logitTASK
+```
+```{r}
+#Predicted value in decision tree model
+treeTASK <-table(testingC$ONTASK_yes, pred_tree)
+treeTASK
+```
+
+```{r}
+install.packages('caTools')
+```
+
+```{r}
+NaiveTASK <- table(testingC$ONTASK_yes, pred_naive)
+NaiveTASK
+```
+```{r}
+#install.packages('caret')
+library(caret)
+```
+
+```{r}
+AccuracyTASK <-confusionMatrix(treeTASK)$overall["Accuracy"]
+                            cat('The accuracy for the tree model is',           
+                            AccuracyTASK*100, '%')
+```
+
+```{r}
+AccuracyTASK <-confusionMatrix(NaiveTASK)$overall["Accuracy"]
+                            cat('The accuracy for the naive model is',           
+                            AccuracyTASK*100, '%')
+```
+
+Conclusion (aca2_dataset_training): 
+ Here is How I trained with training.csv data set.  I am going to save as this rmd file to access "aca_dataset_validation.csv".

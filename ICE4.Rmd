@@ -1,0 +1,131 @@
+---
+title: "ICE4"
+# Name: Cleo You
+# Binary logistic regression model, decision tree model, Naive Bayes model
+---
+
+```{r}
+library(tidyverse)
+```
+```{r}
+mooc <-read.csv("ICE4_Data.csv")
+mooc
+
+```
+
+```{r}
+table(mooc$certified)
+```
+```{r}
+summary(mooc)
+```
+
+```{r}
+install.packages("GGally")
+library(GGally)
+```
+
+```{r}
+ggpairs(mooc, columns = 2:4, ggplot2::aes(color=certified))
+```
+
+```{r}
+# From the above descriptive data, I see 2 different colors to represent yes and no. There are three types of diagrams; graph, dots, and information. 
+```
+
+```{r}
+moocD <-mooc %>% mutate(certified_yes=as_factor(certified)) %>%
+  select(certified_yes, forum.posts, grade, assignment)
+moocD
+```
+
+```{r}
+logitModel<-glm(certified_yes ~ forum.posts + grade + assignment, data=moocD, family = "binomial")
+```
+
+```{r}
+summary(logitModel)
+```
+
+Decision Tree
+```{r}
+install.packages("party")
+library(party)
+```
+
+```{r}
+moocTree <-ctree(
+  certified_yes ~ forum.posts+grade+assignment, 
+  data = moocD
+)
+```
+```{r}
+print(moocTree)
+```
+
+```{r}
+plot(moocTree)
+#graphical representation
+```
+
+Naive Bayes
+```{r}
+
+library(e1071)
+
+library(partykit)
+```
+
+```{r}
+moocNB <-naiveBayes(certified_yes ~ forum.posts + grade + assignment,
+                     data=moocD)
+```
+
+```{r}
+certified_pred_NB <- predict(moocNB, moocD[,2:4])
+```
+
+```{r}
+ performance=moocD$certified_yes == certified_pred_NB
+cat('The accuracy is', sum(performance)/length(performance)*100, '%')
+```
+Model Evaluation
+```{r}
+# Step 1: Split data
+set.seed(123)
+sample_size <- floor(0.8*nrow(moocD))
+picked <- sample(seq_len(nrow(moocD)), size = sample_size)
+training_moocD <- moocD[picked,]
+testing_moocD <-moocD[-picked,]
+```
+```{r}
+#Step 2: Re-train the model with just the training data
+#Logistic regression
+
+moocLogit <-glm(certified_yes ~ forum.posts + grade + assignment, data = training_moocD, family = "binomial")
+```
+
+```{r}
+#Decision Tree
+moocThree<-ctree(certified_yes ~ forum.posts + grade + assignment, data=moocD)
+
+#Naive Bayes
+moocNB <-naiveBayes(certified_yes ~ forum.posts + grade + assignment,
+                     data=moocD)
+
+certified_pred_NB <- predict(moocNB, moocD[,2:4])
+
+ performance=moocD$certified_yes == certified_pred_NB
+cat('The accuracy is', sum(performance)/length(performance)*100, '%')
+```
+
+```{r}
+#Other implementation of decision tree: 
+#Random forest
+#k Nearest Neighbor
+#Step regression(not stepwise regression)
+#Supported vector machine
+#Neural Networks
+
+```
+

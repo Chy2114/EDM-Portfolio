@@ -1,0 +1,259 @@
+---
+title: "ICE1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+ICE 1
+
+```{r}
+library(beepr)
+#Beeper(5) will play a sound.  Feel free to try beepr(x) where x is any integer from 1 to 11.
+beep(5)
+beep(8)
+```
+
+```{r}
+beepr::beep(5)
+
+?beepr
+?beep()
+
+##Click on Global Environment under Environment Tab to check packages
+(.packages())
+```
+
+Understand data type and structure in R
+Basic data types: Character, numeric, logical 
+
+```{r}
+# Assigning 1 to 10 to x
+x<-1:10
+print(x)
+```
+```{r}
+typeof(x)
+```
+
+```{r}
+length(x)
+```
+```{r}
+y<-1:5.5
+print(y)
+```
+
+```{r}
+typeof(y)
+```
+```{r}
+length(x)
+```
+
+```{r}
+z<-a:h
+print(z)
+##Charactors create the error.
+```
+
+```{r}
+z<-TRUE:FALSE
+print(z)
+```
+
+```{r}
+##This is a series of raw data stored in characters
+characterData <- c ("East","West","East","North","North","East", "West","West","East","North")
+typeof(characterData)
+```
+
+```{r}
+print(characterData)
+```
+## Where is [10] "East" "North"? Find index vector
+
+```{r}
+##Apply the factor function to make it an ordinal variable
+factor_data <- factor(characterData)
+typeof(factor_data)
+```
+
+```{r}
+print(factor_data)
+```
+
+```{r}
+##Creating an atomic vector only with logical values
+v <- c(TRUE, TRUE, FALSE, FALSE)
+typeof(v)
+```
+
+```{r}
+print(v)
+```
+
+```{r}
+##Creating an atomic vector but try to store diffenet data types in it.
+v<- c("1", 1, TRUE)
+typeof(v)
+```
+```{r}
+print(v)
+```
+
+```{r}
+##Creating an atomic vector but try to store different data types in it.
+l <- list("1", 1, TRUE)
+typeof(l)
+```
+## when I typed 1: it said it is "double" type
+
+```{r}
+print(l)
+```
+
+Matrix and data frame
+```{r}
+m <- matrix(nrow=3, ncol=3)
+m
+```
+```{r}
+FOURS <- matrix(
+  c(4,4,4,4), ## All the data you want to put into the matrix
+  nrow = 2, ## The number of rows
+  ncol = 2) ## The number os columns
+
+FOURS
+```
+
+```{r}
+orderedM <- matrix(
+  c(1,2,3,4),
+  nrow=2,
+  ncol=2)
+orderedM
+## 1,2,3,4 arranged that columns first and row
+```
+
+```{r}
+dim(FOURS) ## Dimension of a matrix
+```
+
+```{r}
+class(FOURS) ##class of the matrix
+```
+
+```{r}
+typeof(FOURS) ##type of data
+```
+
+```{r}
+id <- letters [1:10] #creating the first 10 alphabetic letters
+score <- 1:10 # a numeric vector with 10 elements from 1 to 10
+enrolled <- logical(10) #a logical vector with 10 elements.  All false
+
+df<- data.frame (id, score, enrolled)
+df
+```
+```{r}
+head(id) #Shows first 6 rows
+tail(id) #Shows last 6 rows
+dim(id)#Returns the dimensions of data frame
+nrow(id)
+ncol(id)
+str(id)
+names(id)
+sapply (dataframe,class)
+```
+
+```{r}
+data("mtcars")
+head(mtcars)
+```
+```{r}
+data("iris")
+iris
+```
+
+```{r}
+library(tidyverse)
+
+```
+```{r}
+ICEdata <-read_csv("ICE1_Data.csv")
+ICEdata
+```
+
+
+getwd()
+ICEdata < - read_csv(choose.dir())
+
+
+**Quick-and-dirty summary
+```{r}
+summary(ICEdata)
+```
+
+```{r}
+ICEdata_factor <- ICEdata %>%
+  mutate_if(sapply(ICEdata, is.character),as.factor)
+summary (ICEdata_factor)
+```
+
+**Selecting limited number of variables
+```{r}
+studentProgressGraduation <-
+  ICEdata_factor %>%
+  select('Progress_Rpt_10-11', 'graduation 2010-11')
+
+studentProgressGraduation
+
+```
+
+```{r}
+graduation201011 <- ICEdata$'graduation 2010-11'
+head(graduation201011)
+
+```
+
+```{r}
+mean(graduation201011)
+median(graduation201011)
+length(graduation201011)
+
+```
+
+Plot Something
+```{r}
+plot(studentProgressGraduation)
+
+```
+
+```{r}
+hist(graduation201011)
+
+```
+

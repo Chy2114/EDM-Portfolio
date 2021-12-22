@@ -1,0 +1,122 @@
+---
+# Analysis Challenge Assignment 1
+# Author: Cleo You
+---
+
+1. Criteria
+Alex requested to find her ideal schools that satisfy her criteria.  Here are her criteria for the ideal schools.  
+1) Safety: low crime
+2) Urban: Big city life 
+3) Diversity: diverse culture
+4) Quality: Decent educational program
+
+We are going to create a data set with crime rate, degree of urbanization of institution, diversity and quality.  Diversity and quality are not clear enough to declare the definition.  
+
+```{r}
+#install.packages(Tidyverse)
+library(tidyverse)
+#Install and load the tidyverse to use: Data analysis
+```
+
+
+```{r}
+getwd()
+#Get Directory to insert the data. 
+```
+
+
+```{r}
+#Import Crime dataset
+Crimedata<-read_csv("Crime_2015.csv")
+
+Crimedata
+```
+
+```{r}
+#Summary of crimedata
+Crimedata_factor <-Crimedata %>% 
+  mutate_if(sapply(Crimedata, is.character), as.factor)
+
+summary(Crimedata_factor)
+```
+```
+# According to this summary, we can learn that violentCrime(Median : 333.7), Murder(Median : 3.800), Rape(Median : 37.55), Robbery(Median : 67.35), AggravatedAssault(Median :215.7).  Trying to filter the data with median for all five categories. I decided to choose these 5 categories because those items are related to school settings. 
+
+1) Safety: Low crime 
+```{r}
+library(dplyr)
+
+```
+
+```{r}
+# Create new variable to check just 5 categories that related to safety for students.
+CrimeVariable <- Crimedata %>%
+  select('MSA', 'ViolentCrime', 'Rape', 'Robbery', 'Murder', 'AggravatedAssault')
+CrimeVariable
+```
+
+
+```{r}
+# Filter data with 5 categories that below median
+
+CrimeFinal<-
+  CrimeVariable %>% filter(ViolentCrime <= 333.7 & Murder<=3.800 & Rape<=37.55 & Robbery<=67.35 & AggravatedAssault<=215.7)
+
+CrimeFinal
+```
+#Conclusion: I am going to find more appropriate school for Alex from 62 area above. 
+
+
+
+```{r}
+#Import dataset
+ACAdata<-read_csv("CollegeScorecard.csv")
+ACAdata
+```
+
+```{r}
+ACAdata_factor <-ACAdata %>% # Summary of ACA data
+  mutate_if(sapply(ACAdata, is.character), as.factor)
+summary(ACAdata_factor)
+```
+
+```{r}
+spec(ACAdata)
+#Retrieve the column of data
+```
+
+2) Urban setting: 
+
+#The definition of urban: City, Large Territory inside an urbanized area and inside a principal city with population of 250,000 or more.
+
+
+```{r}
+Urbandata <-read_csv("population.csv")
+summary(Urbandata)
+count(Urbandata)
+```
+
+
+```{r}
+Urbandata %>% head()
+Urbandata %>%
+  select ('...14') %>%
+  filter('...14'>250000)
+# select data greater than 250,000
+
+```
+
+
+3) Diversity: with diverse culture
+```{r}
+# Since CA is a big state,  there was only one choice of school from CA out of 62 schools.  "Dominican University of California" 
+```
+
+
+```{r}
+CollegeScoredata<-read_csv("CollegeScorecard.csv")
+#Import College list
+CollegeScoredata
+```
+
+4) Quality: It is very difficult to define decent educational program. Therefore, quality will not be one of criteria can use for Alex's appropriate school.   Alex will use admission rate to determine the quality of school. 

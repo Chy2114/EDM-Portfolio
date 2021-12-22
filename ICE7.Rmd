@@ -1,0 +1,184 @@
+---
+"title: ICE 7"
+"Name: Cleo You"
+---
+#ACA 2
+
+```{r}
+library(tidyverse)
+library(factoextra)
+library(GGally)
+library(dplyr)
+library(cluster)
+library(e1071)
+library(partykit)
+```
+
+```{r}
+#Import the data
+training <- read.csv("aca2_dataset_validation.csv")
+head(training)
+```
+
+```{r}
+summary(training)
+```
+
+```{r}
+#Filtering students who are on task with have Total.time of working
+
+trainingA<-training %>% mutate(ONTASK_yes=as_factor(ONTASK)) %>%
+  select(ONTASK_yes, Total.Time,Obsv.act, Transitions.Durations)
+head(trainingA)
+```
+
+```{r}
+summary(logitModel1)
+```
+```{r}
+#Step 1: Split data
+set.seed(12345)
+sampleA <- floor(0.8*nrow(trainingA))
+pickedA <-sample(seq_len(nrow(trainingA)),size=sampleA)
+trainingC <- trainingA[pickedA,]
+testingC <- trainingA[-pickedA,]
+```
+
+
+```{r}
+#Step 2: Re-train the model. 
+ACAlogit <- glm(ONTASK_yes ~ Total.Time+Obsv.act+Transitions.Durations, data=trainingC, family="binomial")
+```
+
+```{r}
+#Recall decision tree and naivebayes methods
+TrainingTree <- ctree(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+trainingB <- naiveBayes(ONTASK_yes~Total.Time+Obsv.act+Transitions.Durations, data=trainingA)
+```
+
+```{r}
+# Feed the variables in the testing dataset and obtain the predicted values.
+probabilities_A <- predict(ACAlogit, testingC[,2:4], type='response')
+pred_logit <- ifelse(probabilities_A > 0.5, "Yes", "No")
+pred_tree <- predict(TrainingTree, testingC[,2:4])
+pred_naive <-predict(trainingB, testingC[,2:4])
+```
+
+
+```{r}
+#logistic regression model confusion matrix
+logitTASK <-table(testingC$ONTASK_yes, pred_logit)
+logitTASK
+```
+
+```{r}
+#Predicted value in decision tree model
+treeTASK <-table(testingC$ONTASK_yes, pred_tree)
+treeTASK
+```
+
+
+```{r}
+library(caTools)
+```
+
+```{r}
+NaiveTASK <- table(testingC$ONTASK_yes, pred_naive)
+NaiveTASK
+```
+
+```{r}
+library(caret)
+```
+
+```{r}
+AccuracyTASK <-confusionMatrix(treeTASK)$overall["Accuracy"]
+                            cat('The accuracy for the tree model is',           
+                            AccuracyTASK*100, '%')
+```
+
+```{r}
+AccuracyTASK <-confusionMatrix(NaiveTASK)$overall["Accuracy"]
+                            cat('The accuracy for the naive model is',           
+                            AccuracyTASK*100, '%')
+
+
+
+
+#ACA3
+
+#title: "Analysis Challenege Assignment 3"
+#Name: Cleo You
+```
+
+ACA3
+```{r}
+# loading packages to require for setting
+library(tidyverse) # data manipulation
+library(cluster) # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+library(ggplot2)
+library(cluster)
+```
+
+```{r}
+# Data Preparation:  Import the original data to analyze
+CollegeScorecard <- read.csv("CollegeScorecard.csv") 
+head(CollegeScorecard)
+```
+```{r}
+#With UNITID
+NewCollegeScorecard <- CollegeScorecard %>% select ('UNITID', 'C150_4', 'C150_L4', 'C150_4_POOLED', 'C150_L4_POOLED' )
+NCC<-as.data.frame(NewCollegeScorecard)
+head(NCC)
+
+#Without UnitID
+NCCC <- NCC %>% select('C150_4', 'C150_L4', 'C150_4_POOLED', 'C150_L4_POOLED')
+NC<-as.data.frame(NCCC)
+```
+```{r}
+# Prepare the data
+# Replace NA with 0 to remove all NAs
+NC[is.na(NC)] <-0  
+NCC[is.na(NCC)] <-0 
+summary(NC)
+```
+#Elbow method
+```{r}
+# when center=2
+NCC2 <-kmeans(NC, centers=2)
+disNCC2 = dist(NC)^2
+silNCC2 = silhouette(NCC2$cluster, disNCC2)
+fviz_silhouette(silNCC2)
+```
+
+```{r}
+#Center=3
+NCC3 <-kmeans(NC, centers=3)
+disNCC3 = dist(NC)^2
+silNCC3 = silhouette(NCC3$cluster, disNCC3)
+fviz_silhouette(silNCC3)
+```
+```{r}
+#center=4
+NCC4 <-kmeans(NC, centers=4)
+disNCC4 = dist(NC)^2
+silNCC4 = silhouette(NCC4$cluster, disNCC4)
+fviz_silhouette(silNCC4)
+```
+```{r}
+#Center=5
+NCC5 <-kmeans(NC, centers=5)
+disNCC5 = dist(NC)^2
+silNCC5 = silhouette(NCC5$cluster, disNCC5)
+fviz_silhouette(silNCC5)
+```
+```{r}
+NC %>% mutate(cluster=NCC2$cluster)
+fviz_nbclust(NC, kmeans, method="wss")
+```
+
+Conclusion: 
+ACA2 evaluated with confusion matrix. 
+ACA3 evaluated with clustering. Especially, silhouette plot and elbow method.  Elbow method is very convenient to choose the number of clusters.  I think that it will be better to run elbow method first and visualize with silhouette plot after.  Also, since is just a line graphfor elbow method, it is easy to understand the number of clustering. 
+

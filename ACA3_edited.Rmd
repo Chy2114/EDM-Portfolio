@@ -1,0 +1,111 @@
+---
+title: "Analysis Challenege Assignment 3"
+#Name: Cleo You
+---
+```{r}
+#title: "Analysis Challenege Assignment 3"
+#Name: Cleo You
+```
+
+
+```{r}
+# loading packages to require for setting
+library(tidyverse) # data manipulation
+library(cluster) # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+library(ggplot2)
+library(cluster)
+```
+
+```{r}
+# Data Preparation:  Import the original data to analyze
+CollegeScorecard <- read.csv("CollegeScorecard.csv") 
+head(CollegeScorecard)
+```
+First, I am going to use 'Completion' category from CollegeScorecard.  I think that to determine for increasing college graduation rates, completion was very important factor to discuss.  To discuss about completion, admissions, and financial aid will be followed up to support completion. 
+
+Completion: Variables: C150_4(four-year schools), C150_L4(completion rate for first-time, at less than 4 year institutions), C150_4_POOLED(Among institutions with fewer than 30 student sin the combined cohorts, the measure was created based on a four-year cohort instead) C150_4_POOLED(Among institutions with fewer than 30 student sin the combined cohorts, the measure was created based on a less than four-year cohort instead)
+
+```{r}
+#With UNITID
+NewCollegeScorecard <- CollegeScorecard %>% select ('UNITID', 'C150_4', 'C150_L4', 'C150_4_POOLED', 'C150_L4_POOLED' )
+NCC<-as.data.frame(NewCollegeScorecard)
+head(NCC)
+
+#Without UnitID
+NCCC <- NCC %>% select('C150_4', 'C150_L4', 'C150_4_POOLED', 'C150_L4_POOLED')
+NC<-as.data.frame(NCCC)
+```
+
+```{r}
+# Prepare the data
+# Replace NA with 0 to remove all NAs
+NC[is.na(NC)] <-0  
+NCC[is.na(NCC)] <-0 
+summary(NC)
+```
+According to summary, I can check what is the number of mean by each categories.
+
+```{r}
+# when center=2
+NCC2 <-kmeans(NC, centers=2)
+disNCC2 = dist(NC)^2
+silNCC2 = silhouette(NCC2$cluster, disNCC2)
+fviz_silhouette(silNCC2)
+```
+```{r}
+#Center=3
+NCC3 <-kmeans(NC, centers=3)
+disNCC3 = dist(NC)^2
+silNCC3 = silhouette(NCC3$cluster, disNCC3)
+fviz_silhouette(silNCC3)
+```
+
+```{r}
+#center=4
+NCC4 <-kmeans(NC, centers=4)
+disNCC4 = dist(NC)^2
+silNCC4 = silhouette(NCC4$cluster, disNCC4)
+fviz_silhouette(silNCC4)
+```
+When center is 4, it seemed like that previous cluster 1 from when center is 3 divided by 2. 
+
+```{r}
+#Center=5
+NCC5 <-kmeans(NC, centers=5)
+disNCC5 = dist(NC)^2
+silNCC5 = silhouette(NCC5$cluster, disNCC5)
+fviz_silhouette(silNCC5)
+```
+```{r}
+NC %>% mutate(cluster=NCC2$cluster)
+fviz_nbclust(NC, kmeans, method="wss")
+```
+I could observe how many cluster will be great for our data.  According to the elbow method, I can assume that closest cluster center which is 3 for this case.  From cluster 3 to 10, total within sum of square are all same.  Therefore, k=3 is suitable to observe with silhouette plot with kmeans.   
+
+```{r}
+# Apply PCA for the data NC
+PCA_Completion <-prcomp(NCC, scale.=FALSE)
+# A summary of PCA
+summary(PCA_Completion)
+```
+```{r}
+# To check the vectors that represent the principal axes of the data. 
+PCA_Completion$rotation
+```
+
+```{r}
+# Reduce the data to two dimentions and plot
+PCA_Completion2 <-PCA_Completion $x[,1:2]
+plot(PCA_Completion2)
+```
+```{r}
+# k=3 to use kmeans
+Completion1 <- kmeans(PCA_Completion2, centers=3)
+plot(PCA_Completion2, col=Completion1$cluster)
+```
+
+
+
+
+
